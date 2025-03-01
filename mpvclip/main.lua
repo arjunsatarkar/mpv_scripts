@@ -1,6 +1,6 @@
 local input = require "mp.input"
 
-local function dump(arr)
+local function dump_arr(arr)
     local result = ""
     for _, v in ipairs(arr) do
         result = result .. string.format("%q", v) .. ", "
@@ -46,7 +46,7 @@ local function do_clip(a, b, crf, two_pass_target, sub_track_id, path)
         out_path
     })
 
-    print(dump(args))
+    print(dump_arr(args))
 
     mp.command_native({ "subprocess", args })
     mp.osd_message("mpvclip: wrote clip to " .. out_path)

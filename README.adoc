@@ -3,7 +3,7 @@
 
 == Scripts
 
-* *mpvclip.* Clip sections of video with ffmpeg. Allows choosing CRF/two-pass target size and preset, with sensible defaults.
+* *mpvclip.* Clip sections of video with ffmpeg. Allows choosing CRF/two-pass target size and preset, with sensible defaults. As of 2025-03-01, requires recent mpv git master build.
 
 == Copying
 
