@@ -1,0 +1,23 @@
+= mpv scripts by Arjun Satarkar
+:toc:
+
+== Scripts
+
+* *mpvclip.* Clip sections of video with ffmpeg. Allows choosing CRF/two-pass target size and preset, with sensible defaults.
+
+== Copying
+
+....
+mpv scripts
+Copyright (C) 2025-present Arjun Satarkar
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 3.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
+more details.
+....
+
+The file `+LICENSE.txt+` in this directory contains the text of the license.
