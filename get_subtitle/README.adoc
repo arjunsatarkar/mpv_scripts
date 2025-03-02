@@ -1,0 +1,4 @@
+= get_subtitle
+:toc:
+
+Copy the text of the current subtitle line to the clipboard. Relies on `https://github.com/astrand/xclip[+xclip+`] to function.

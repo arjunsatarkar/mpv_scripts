@@ -48,7 +48,7 @@ local function do_clip(a, b, crf, two_pass_target, sub_track_id, path)
 
     print(dump_arr(args))
 
-    mp.command_native({ "subprocess", args })
+    mp.command_native({ name = "subprocess", args = args })
     mp.osd_message("mpvclip: wrote clip to " .. out_path)
     print("Wrote clip to " .. out_path)
 end

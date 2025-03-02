@@ -4,6 +4,7 @@
 == Scripts
 
 * *mpvclip.* Clip sections of video with ffmpeg. Allows choosing CRF/two-pass target size and preset, with sensible defaults. As of 2025-03-01, requires recent mpv git master build.
+* *get_subtitle.* Copy the text of the current subtitle line to the clipboard. Relies on `https://github.com/astrand/xclip[+xclip+`] to function.
 
 == Copying
 
