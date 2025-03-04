@@ -3,9 +3,13 @@ local input = require "mp.input"
 local function log_cmd(args)
     local cmd = ""
     for _, v in ipairs(args) do
-        cmd = cmd .. " " .. string.format("%s", v)
+        cmd = cmd .. " " .. v
     end
     print("Running command:" .. cmd)
+end
+
+local function run_subprocess(args)
+    mp.command_native({ name = "subprocess", args = args, playback_only = false })
 end
 
 local function extend(arr1, arr2)
@@ -29,28 +33,23 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
     local AUDIO_BYTES_PER_SECOND = math.floor(AUDIO_BITRATE / 8)
     local FILTERGRAPH_V_OUT = "v_out"
 
-    local video_input_pad = "0:v:" .. tostring(video_track_id - 1)
+    local video_input_pad = "0:v:" .. (video_track_id - 1)
 
     local audio_input_pad = ""
     if audio_track_id then
-        audio_input_pad = "0:a:" .. tostring(audio_track_id - 1)
+        audio_input_pad = "0:a:" .. (audio_track_id - 1)
     end
 
     local filtergraph = nil
     if sub_track_id then
-        --[[
-        Not sure why this is the correct number of escapes, but it works.
-        Ref: https://stackoverflow.com/a/10729560
-        (slightly different context and approach, but helpful)
-        --]]
+        -- Ref: https://ffmpeg.org/ffmpeg-filters.html#filtergraph-escaping
         local squote_escaped_path = path:gsub("'", [['\\\'']])
-        filtergraph = string.format(
-            "[%s]subtitles='%s':si=%d[%s]",
+        filtergraph = ("[%s]subtitles='%s':si=%d[%s]"):format(
             video_input_pad, squote_escaped_path, sub_track_id - 1, FILTERGRAPH_V_OUT
         )
     end
 
-    local out_path = string.format("clip_%d.mp4", os.time())
+    local out_path = ("clip_%d.mp4"):format(os.time())
 
     local base_args = {
         "ffmpeg",
@@ -63,6 +62,7 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         "-c:v", "libx264",
         "-ss", a,
         "-to", b,
+        "-pix_fmt", "yuv420p",
     }
     if filtergraph then
         extend(base_args, {
@@ -87,13 +87,12 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         extend(args, audio_args)
         extend(args, {
             "-crf", crf,
-            "-pix_fmt", "yuv420p",
             "-movflags", "+faststart",
             out_path
         })
 
         log_cmd(args)
-        mp.command_native({ name = "subprocess", args = args })
+        run_subprocess(args)
     elseif two_pass_target then
         local clip_secs = (tonumber(b) - tonumber(a))
         local total_bytes = two_pass_target * 1024 * 1024
@@ -101,7 +100,7 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         local video_bytes = total_bytes - audio_bytes
         local video_bitrate = video_bytes / clip_secs * 8
 
-        print(string.format("Clip audio will take up %d bytes, leaving %d for video", audio_bytes, video_bytes))
+        print(("Clip audio will take up %d bytes, leaving %d for video"):format(audio_bytes, video_bytes))
         if video_bytes <= 0 then
             local message = "Can't clip: not enough space for video"
             mp.osd_message(message)
@@ -119,7 +118,7 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         })
 
         log_cmd(args)
-        mp.command_native({ name = "subprocess", args = args })
+        run_subprocess(args)
 
         args = copy_arr(base_args)
         extend(args, audio_args)
@@ -130,9 +129,9 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         })
 
         log_cmd(args)
-        mp.command_native({ name = "subprocess", args = args })
+        run_subprocess(args)
 
-        local log_file_name = string.format("ffmpeg2pass-%d.log", video_track_id - 1)
+        local log_file_name = ("ffmpeg2pass-%d.log"):format(video_track_id - 1)
         os.remove(log_file_name)
         os.remove(log_file_name .. ".mbtree")
     end
