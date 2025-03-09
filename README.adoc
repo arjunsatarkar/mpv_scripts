@@ -1,10 +1,13 @@
 = mpv scripts by Arjun Satarkar
 :toc:
 
+Assume these are compatible only with Unix-like systems by default; examination of the code will often suggest relatively minor modifications needed to support Windows. If this is relevant to your use case, feel free to open an issue or pull request.
+
 == Scripts
 
 * *mpvclip.* Clip sections of video with ffmpeg. Allows choosing CRF/two-pass target size, with sensible defaults. As of 2025-03-01, requires recent mpv git master build.
 * *get_subtitle.* Copy the text of the current subtitle line to the clipboard. Relies on `https://github.com/astrand/xclip[+xclip+`] to function.
+* *savepoints.* Save the current video timestamp to disk, and easily jump between all savepoints set for a particular video.
 
 == Copying
 
