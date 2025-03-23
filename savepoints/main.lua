@@ -10,6 +10,7 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
 more details.
 ]]
+---@diagnostic disable: param-type-mismatch, need-check-nil
 
 local input = require("mp.input")
 local utils = require("mp.utils")
@@ -17,8 +18,10 @@ local utils = require("mp.utils")
 local home_dir = os.getenv("HOME")
 local savepoints_dir = utils.join_path(home_dir, "mpv-savepoints")
 
-local savepoints = {}
-local savepoints_hms = {}
+local savepoints = nil
+local savepoints_hms = nil
+
+local media_path = nil
 
 local function bsearch_next_index(arr, val, past_end)
     local low = 1
@@ -46,20 +49,22 @@ local function to_hms(pos)
     return ("%02d:%02d:%02d.%03d"):format(hours, minutes, seconds, milliseconds)
 end
 
-local function cache_savepoint(pos)
-    local i = bsearch_next_index(savepoints, pos, true)
-    table.insert(savepoints, i, pos)
-    table.insert(savepoints_hms, i, to_hms(pos))
+local function savepoints_cache_initialized()
+    return savepoints ~= nil and savepoints_hms ~= nil
 end
 
 local function open_savepoint_file(mode)
-    return io.open(utils.join_path(savepoints_dir, mp.get_property("filename") .. ".txt"), mode)
+    if media_path == nil then
+        return nil
+    end
+    local _, media_filename = utils.split_path(media_path)
+    local savepoint_filename = ("%s.txt"):format(media_filename)
+    return io.open(utils.join_path(savepoints_dir, savepoint_filename), mode)
 end
 
 local function load_savepoints()
-    if next(savepoints) ~= nil then
-        return
-    end
+    savepoints = {}
+    savepoints_hms = {}
 
     mp.command_native({
         name = "subprocess",
@@ -81,7 +86,15 @@ local function load_savepoints()
 end
 
 local function add_savepoint()
-    load_savepoints()
+    if not savepoints_cache_initialized() then
+        return
+    end
+
+    local function cache_savepoint(pos)
+        local i = bsearch_next_index(savepoints, pos, true)
+        table.insert(savepoints, i, pos)
+        table.insert(savepoints_hms, i, to_hms(pos))
+    end
 
     local file = open_savepoint_file("a")
     if file then
@@ -94,8 +107,9 @@ local function add_savepoint()
 end
 
 local function jump_to_savepoint()
-    load_savepoints()
-
+    if not savepoints_cache_initialized() then
+        return
+    end
     if next(savepoints) == nil then
         mp.osd_message("No savepoints for this file!")
         return
@@ -113,3 +127,7 @@ end
 
 mp.add_key_binding("a", "add-savepoint", add_savepoint)
 mp.add_key_binding("ctrl+a", "jump-to-savepoint", jump_to_savepoint)
+mp.observe_property("path", "string", function(_, p)
+    media_path = p
+    load_savepoints()
+end)
