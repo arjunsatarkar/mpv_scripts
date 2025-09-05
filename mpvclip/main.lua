@@ -12,6 +12,12 @@ more details.
 ]]
 
 local input = require "mp.input"
+local utils = require("mp.utils")
+
+local options = {
+    ["clip-dir"] = utils.getcwd()
+}
+require "mp.options".read_options(options)
 
 local function log_cmd(args)
     local cmd = ""
@@ -62,7 +68,7 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
         )
     end
 
-    local out_path = ("clip_%d.mp4"):format(os.time())
+    local out_path = utils.join_path(options["clip-dir"], ("clip_%d.mp4"):format(os.time()))
 
     local base_args = {
         "ffmpeg",
