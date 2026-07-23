@@ -60,7 +60,7 @@ local function do_clip(a, b, crf, two_pass_target, video_track_id, audio_track_i
     end
 
     local filtergraph = nil
-    if sub_track_id then
+    if sub_track_id and mp.get_property_bool("sub-visibility") then
         -- Ref: https://ffmpeg.org/ffmpeg-filters.html#filtergraph-escaping
         local squote_escaped_path = path:gsub("'", [['\\\'']])
         filtergraph = ("[%s]subtitles='%s':si=%d[%s]"):format(
