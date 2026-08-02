@@ -86,7 +86,7 @@ local function open_subtitle_in_browser()
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: 100dvh;
             font-size: xxx-large;
             background-color: black;
             color: white;
