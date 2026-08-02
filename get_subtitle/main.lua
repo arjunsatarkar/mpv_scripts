@@ -76,7 +76,7 @@ local function open_subtitle_in_browser()
             align-items: center;
             justify-content: center;
             height: 100vh;
-            font-size: xx-large;
+            font-size: xxx-large;
             background-color: black;
             color: white;
         }
