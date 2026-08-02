@@ -20,6 +20,16 @@ local function get_subtitle()
     return mp.get_property("sub-text")
 end
 
+-- Enough to prevent the subs from XSSing you at least
+local function html_escape(text)
+    return text
+        :gsub("&", "&amp;")
+        :gsub("<", "&lt;")
+        :gsub(">", "&gt;")
+        :gsub('"', "&quot;")
+        :gsub("'", "&#x27;")
+end
+
 local function copy_subtitle()
     local text = get_subtitle()
 
@@ -52,7 +62,8 @@ local function copy_subtitle()
 end
 
 local function open_subtitle_in_browser()
-    local text = get_subtitle()
+    local text = html_escape(get_subtitle())
+    local title_and_time = html_escape(("%s (%s)"):format(mp.get_property("media-title"), mp.get_property_osd("playback-time")))
     local script_dir = mp.get_script_directory()
 
     tmp_file_path = utils.join_path(script_dir, "get_subtitle_tmp.html")
@@ -65,7 +76,7 @@ local function open_subtitle_in_browser()
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>get subtitle (mpv script)</title>
+    <title>%s</title>
     <style>
         html, body {
             margin: 0;
@@ -83,9 +94,12 @@ local function open_subtitle_in_browser()
     </style>
 </head>
 <body>
-    <div>%s</div>
+    <div>
+        <div>%s</div>
+        <br><cite>&mdash; %s</cite>
+    </div>
 </body>
-</html>]], text))
+</html>]], title_and_time, text, title_and_time))
         file:close()
     end
 
