@@ -1,5 +1,6 @@
 --[[
 mpv scripts - get_subtitle
+https://github.com/arjunsatarkar/mpv_scripts
 Copyright (C) 2025-present Arjun Satarkar
 
 This program is free software: you can redistribute it and/or modify it under
@@ -11,10 +12,16 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
 more details.
 ]]
 
+local utils = require("mp.utils")
+
 Result = nil
 
-local function main()
-    local text = mp.get_property("sub-text")
+local function get_subtitle()
+    return mp.get_property("sub-text")
+end
+
+local function copy_subtitle()
+    local text = get_subtitle()
 
     local args = {
         "xclip",
@@ -44,4 +51,46 @@ local function main()
     end
 end
 
-mp.add_key_binding("g", "get-subtitle", main)
+local function open_subtitle_in_browser()
+    local text = get_subtitle()
+    local script_dir = mp.get_script_directory()
+
+    tmp_file_path = utils.join_path(script_dir, "get_subtitle_tmp.html")
+
+    local file = io.open(tmp_file_path, "w")
+    if file then
+        file:write(string.format([[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>get subtitle (mpv script)</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: xx-large;
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div>%s</div>
+</body>
+</html>]], text))
+        file:close()
+    end
+
+    mp.command_native({name = "subprocess", args = {"xdg-open", tmp_file_path}})
+end
+
+mp.add_key_binding("g", "copy-subtitle", copy_subtitle)
+mp.add_key_binding("ctrl+g", "open-subtitle-in-browser", open_subtitle_in_browser)

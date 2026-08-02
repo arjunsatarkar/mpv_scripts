@@ -1,5 +1,6 @@
 --[[
 mpv scripts - mpvclip
+https://github.com/arjunsatarkar/mpv_scripts
 Copyright (C) 2025-present Arjun Satarkar
 
 This program is free software: you can redistribute it and/or modify it under
